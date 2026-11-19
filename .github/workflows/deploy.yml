@@ -1,0 +1,39 @@
+name: Deploy
+
+# Push ke main = deploy biasa. Run manual dengan input version = rollback ke tag tersebut.
+run-name: ${{ inputs.version && format('Rollback ke {0}', inputs.version) || github.event.head_commit.message }}
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag versi tujuan rollback (contoh: v2.0.0)"
+        required: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.version }} # kosong saat push -> pakai commit terbaru
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v5
