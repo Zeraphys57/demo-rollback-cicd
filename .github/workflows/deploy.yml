@@ -31,8 +31,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.version }} # kosong saat push -> pakai commit terbaru
-      # supaya browser tidak memakai app.js lama dari cache setelah deploy/rollback
-      - run: sed -i "s/app.js/app.js?v=${{ github.run_id }}/" site/index.html
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
